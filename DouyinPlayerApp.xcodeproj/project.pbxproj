@@ -8,13 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		A10000010000000000000001 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000001; };
-		A10000010000000000000002 /* DouyinPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000002; };
+		A10000010000000000000003 /* DouyinBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000004; };
+		A10000010000000000000004 /* DouyinJavaScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000005; };
+		A10000010000000000000005 /* DouyinPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000006; };
+		A10000010000000000000006 /* DouyinWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000007; };
+		A10000010000000000000007 /* WebViewCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000008; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A10000020000000000000001 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		A10000020000000000000002 /* DouyinPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DouyinPlayer.swift; sourceTree = "<group>"; };
 		A10000020000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000020000000000000004 /* DouyinBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DouyinBrowserView.swift; sourceTree = "<group>"; };
+		A10000020000000000000005 /* DouyinJavaScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DouyinJavaScript.swift; sourceTree = "<group>"; };
+		A10000020000000000000006 /* DouyinPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DouyinPlayerViewModel.swift; sourceTree = "<group>"; };
+		A10000020000000000000007 /* DouyinWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DouyinWebView.swift; sourceTree = "<group>"; };
+		A10000020000000000000008 /* WebViewCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewCoordinator.swift; sourceTree = "<group>"; };
 		A10000020000000000000010 /* DouyinPlayerApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DouyinPlayerApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -33,7 +41,11 @@
 			isa = PBXGroup;
 			children = (
 				A10000020000000000000001 /* App.swift */,
-				A10000020000000000000002 /* DouyinPlayer.swift */,
+				A10000020000000000000004 /* DouyinBrowserView.swift */,
+				A10000020000000000000005 /* DouyinJavaScript.swift */,
+				A10000020000000000000006 /* DouyinPlayerViewModel.swift */,
+				A10000020000000000000007 /* DouyinWebView.swift */,
+				A10000020000000000000008 /* WebViewCoordinator.swift */,
 				A10000020000000000000003 /* Info.plist */,
 				A10000040000000000000002 /* Products */,
 			);
@@ -100,7 +112,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000010000000000000001 /* App.swift in Sources */,
-				A10000010000000000000002 /* DouyinPlayer.swift in Sources */,
+				A10000010000000000000003 /* DouyinBrowserView.swift in Sources */,
+				A10000010000000000000004 /* DouyinJavaScript.swift in Sources */,
+				A10000010000000000000005 /* DouyinPlayerViewModel.swift in Sources */,
+				A10000010000000000000006 /* DouyinWebView.swift in Sources */,
+				A10000010000000000000007 /* WebViewCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
