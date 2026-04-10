@@ -30,7 +30,7 @@ xcodebuild build -project DouyinPlayerApp.xcodeproj -scheme DouyinPlayerApp \
 ## 핵심 기술 포인트
 
 - **Referer 헤더 필수**: CDN 403 방지 → `AVURLAssetHTTPHeaderFieldsKey`로 `Referer: https://www.douyin.com/` 설정
-- **데스크톱 UA 필수**: 모바일 리다이렉트 방지 → Safari macOS UA 사용
+- **모바일 UA 사용**: iOS Safari UA로 모바일 웹 버전 접근 (주소는 동일하게 `www.douyin.com`)
 - **WKWebView 레이어 문제**: 자체 컴포지팅 레이어로 SwiftUI 위에 그려짐 → 재생 시 `opacity(0)` 숨김
 - **미디어 자동재생 차단**: `mediaTypesRequiringUserActionForPlayback = .all`
 - **Swift 문자열 내 JS 정규식**: `"""` 멀티라인 문자열에서 `\\`가 이중 이스케이프됨 → 정규식 리터럴 대신 `new RegExp()` 사용

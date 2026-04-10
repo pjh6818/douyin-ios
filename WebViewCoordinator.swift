@@ -36,13 +36,26 @@ extension WebViewCoordinator: WKScriptMessageHandler {
               let type = dict["type"],
               let value = dict["value"] else { return }
 
-        os_log("[DouyinPlayer] JS message: %{public}s = %{public}s", type, String(value.prefix(150)))
-
         switch type {
-        case "videoSrc", "ssrData", "apiIntercept", "apiRegex", "visibleVideo":
-            viewModel.storeVideoURL(value)
+        case "visibleVideo":
+            if let data = value.data(using: .utf8),
+               let info = try? JSONSerialization.jsonObject(with: data) as? [String: String],
+               let url = info["url"] {
+                viewModel.replaceWithVisibleVideo(url, title: info["desc"])
+            } else {
+                viewModel.replaceWithVisibleVideo(value)
+            }
+        case "videoInfoList":
+            if viewModel.prefetchState != .idle,
+               let data = value.data(using: .utf8),
+               let items = try? JSONSerialization.jsonObject(with: data) as? [[String: String]] {
+                viewModel.storeVideoInfoList(items)
+            }
+        case "prefetchStatus":
+            if !value.hasPrefix("fetched_") {
+                viewModel.handlePrefetchFailure()
+            }
         case "urlChanged":
-            // In-page URL changed (e.g. Douyin SPA navigation) — reset stale URL
             viewModel.clearVideoURL()
         default:
             break
@@ -60,6 +73,7 @@ extension WebViewCoordinator: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         os_log("[DouyinPlayer] Page loaded: %{public}s", webView.url?.absoluteString ?? "nil")
+        webView.evaluateJavaScript(DouyinJavaScript.networkInterceptScript)
         webView.evaluateJavaScript(DouyinJavaScript.videoInterceptScript)
     }
 

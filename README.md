@@ -149,10 +149,10 @@ let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": head
 
 ### User-Agent 설정
 
-모바일 UA를 사용하면 Douyin이 모바일 버전으로 리다이렉트한다. 데스크톱 Safari UA를 설정하여 PC 웹 버전을 유지한다.
+iOS Safari UA를 설정하여 모바일 웹 버전으로 접근한다. Douyin 모바일 웹도 주소는 `www.douyin.com`으로 동일하다.
 
 ```swift
-wv.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 ..."
+wv.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 ..."
 ```
 
 ### WKWebView 레이어 문제
@@ -222,7 +222,7 @@ func userContentController(_ controller: WKUserContentController,
 
 | 문제 | 원인 | 해결 |
 |---|---|---|
-| 모바일 리다이렉트 | 모바일 UA로 `/jingxuan` 접근 시 모바일 버전으로 리다이렉트 | 데스크톱 Safari UA 설정 |
+| User-Agent | iOS 앱에서 모바일 웹 버전 사용 | iOS Safari UA 설정 |
 | CDN 403 Forbidden | Douyin CDN의 Referer 검증 | `AVURLAssetHTTPHeaderFieldsKey`로 Referer 헤더 추가 |
 | 웹뷰가 플레이어 위에 표시 | WKWebView의 자체 컴포지팅 레이어 | `opacity(0)`으로 웹뷰 숨김 |
 | 배경 프로모 영상 캡처 | `uuu_265.mp4` 등 배경 영상이 video 요소로 존재 | CDN 도메인 패턴으로 필터링 |
