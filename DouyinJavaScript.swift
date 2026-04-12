@@ -7,8 +7,8 @@ enum DouyinJavaScript {
         if (window.__douyinNetworkHooked) return;
         window.__douyinNetworkHooked = true;
 
-        function post(type, value) {
-            try { window.webkit.messageHandlers.douyin.postMessage({type: type, value: value}); } catch(e) {}
+        function post(type, value, source) {
+            try { window.webkit.messageHandlers.douyin.postMessage({type: type, value: value, source: source || ''}); } catch(e) {}
         }
 
         function isRealVideoURL(url) {
@@ -49,12 +49,12 @@ enum DouyinJavaScript {
             window.__douyinFeedState = { cursor: null, hasMore: true, refreshIndex: 2 };
         }
 
-        function extractURLsFromText(text) {
+        function extractURLsFromText(text, source) {
             try {
                 var obj = JSON.parse(text);
                 var items = findAllVideoInfo(obj, 0);
                 if (items.length > 0) {
-                    post('videoInfoList', JSON.stringify(items));
+                    post('videoInfoList', JSON.stringify(items), source);
                 }
             } catch(e) {}
         }
@@ -66,11 +66,11 @@ enum DouyinJavaScript {
             var url = typeof input === 'string' ? input :
                       (input && input.url ? input.url : '');
             return origFetch.apply(this, arguments).then(function(response) {
-                if (url) {
+                if (url && url.indexOf('/web/tab/feed/') === -1) {
                     var clone = response.clone();
                     clone.text().then(function(text) {
                         if (text.includes('play_addr')) {
-                            extractURLsFromText(text);
+                            extractURLsFromText(text, 'Layer3:fetch');
                         }
                     }).catch(function(){});
                 }
@@ -97,7 +97,7 @@ enum DouyinJavaScript {
                         text = JSON.stringify(xhr.response);
                     }
                     if (text && text.includes('play_addr')) {
-                        extractURLsFromText(text);
+                        extractURLsFromText(text, 'Layer3:xhr');
                     }
                 } catch(e) {}
             });
@@ -115,8 +115,8 @@ enum DouyinJavaScript {
 
         window.__douyinCurrentVisibleVideoSrc = null;
 
-        function post(type, value) {
-            try { window.webkit.messageHandlers.douyin.postMessage({type: type, value: value}); } catch(e) {}
+        function post(type, value, source) {
+            try { window.webkit.messageHandlers.douyin.postMessage({type: type, value: value, source: source || ''}); } catch(e) {}
         }
 
         function isRealVideoURL(url) {
@@ -145,7 +145,7 @@ enum DouyinJavaScript {
                     visibleVideos.delete(entry.target);
                 }
             });
-            updateVisibleVideoSrc();
+            updateVisibleVideoSrc('Layer1:intersection');
         }, { threshold: 0.5 });
 
         function findVideoDesc(videoEl) {
@@ -164,7 +164,7 @@ enum DouyinJavaScript {
             return '';
         }
 
-        function updateVisibleVideoSrc() {
+        function updateVisibleVideoSrc(trigger) {
             var bestVideo = null;
             var best = null;
             visibleVideos.forEach(function(v) {
@@ -175,10 +175,10 @@ enum DouyinJavaScript {
                     best = src; bestVideo = v;
                 }
             });
-            if (best) {
+            if (best && best !== window.__douyinCurrentVisibleVideoSrc) {
                 window.__douyinCurrentVisibleVideoSrc = best;
                 var desc = bestVideo ? findVideoDesc(bestVideo) : '';
-                post('visibleVideo', JSON.stringify({ url: best, desc: desc }));
+                post('visibleVideo', JSON.stringify({ url: best, desc: desc }), trigger || 'Layer1');
             }
         }
 
@@ -187,10 +187,10 @@ enum DouyinJavaScript {
             video.__douyinEvtHooked = true;
             videoIntersectionObserver.observe(video);
             video.addEventListener('play', function() {
-                setTimeout(updateVisibleVideoSrc, 200);
+                setTimeout(function() { updateVisibleVideoSrc('Layer1:playEvent'); }, 200);
             });
             video.addEventListener('loadeddata', function() {
-                setTimeout(updateVisibleVideoSrc, 200);
+                setTimeout(function() { updateVisibleVideoSrc('Layer1:loadedData'); }, 200);
             });
         }
 
@@ -208,7 +208,7 @@ enum DouyinJavaScript {
                         node.querySelectorAll('video').forEach(hookVideoEvents);
                     }
                     if (mut.type === 'attributes' && mut.target.nodeName === 'VIDEO') {
-                        setTimeout(updateVisibleVideoSrc, 200);
+                        setTimeout(function() { updateVisibleVideoSrc('Layer4:mutation'); }, 200);
                     }
                 }
             }
@@ -224,12 +224,12 @@ enum DouyinJavaScript {
                 post('urlChanged', lastURL);
                 setTimeout(function() {
                     document.querySelectorAll('video').forEach(hookVideoEvents);
-                    updateVisibleVideoSrc();
+                    updateVisibleVideoSrc('Layer4:urlChange');
                 }, 800);
             }
         }, 300);
 
-        setTimeout(updateVisibleVideoSrc, 1500);
+        setTimeout(function() { updateVisibleVideoSrc('Layer1:initial'); }, 1500);
     })();
     """
 
@@ -237,8 +237,8 @@ enum DouyinJavaScript {
 
     static let scrollToLoadMoreScript = """
     (function() {
-        function post(type, value) {
-            try { window.webkit.messageHandlers.douyin.postMessage({type: type, value: value}); } catch(e) {}
+        function post(type, value, source) {
+            try { window.webkit.messageHandlers.douyin.postMessage({type: type, value: value, source: source || ''}); } catch(e) {}
         }
         function isRealVideoURL(url) {
             if (!url || url.length < 30) return false;
@@ -294,7 +294,7 @@ enum DouyinJavaScript {
 
         fetch(url, { credentials: 'include' }).then(function(r) {
             if (!r.ok) {
-                post('prefetchStatus', 'fetchError_' + r.status);
+                post('prefetchStatus', 'fetchError_' + r.status, 'prefetch:api');
                 return null;
             }
             return r.text();
@@ -308,16 +308,16 @@ enum DouyinJavaScript {
 
                 var items = findAllVideoInfo(obj, 0);
                 if (items.length > 0) {
-                    post('videoInfoList', JSON.stringify(items));
-                    post('prefetchStatus', 'fetched_' + items.length);
+                    post('videoInfoList', JSON.stringify(items), 'prefetch:api');
+                    post('prefetchStatus', 'fetched_' + items.length, 'prefetch:api');
                 } else {
-                    post('prefetchStatus', 'noVideosInResponse');
+                    post('prefetchStatus', 'noVideosInResponse', 'prefetch:api');
                 }
             } catch(e) {
-                post('prefetchStatus', 'parseError');
+                post('prefetchStatus', 'parseError', 'prefetch:api');
             }
         }).catch(function(e) {
-            post('prefetchStatus', 'fetchException');
+            post('prefetchStatus', 'fetchException', 'prefetch:api');
         });
     })();
     """

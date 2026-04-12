@@ -35,9 +35,11 @@ extension WebViewCoordinator: WKScriptMessageHandler {
         guard let dict = message.body as? [String: String],
               let type = dict["type"],
               let value = dict["value"] else { return }
+        let source = dict["source"] ?? ""
 
         switch type {
         case "visibleVideo":
+            os_log("[DouyinPlayer] [%{public}s] 영상 감지", source)
             if let data = value.data(using: .utf8),
                let info = try? JSONSerialization.jsonObject(with: data) as? [String: String],
                let url = info["url"] {
@@ -46,16 +48,22 @@ extension WebViewCoordinator: WKScriptMessageHandler {
                 viewModel.replaceWithVisibleVideo(value)
             }
         case "videoInfoList":
-            if viewModel.prefetchState != .idle,
-               let data = value.data(using: .utf8),
+            if let data = value.data(using: .utf8),
                let items = try? JSONSerialization.jsonObject(with: data) as? [[String: String]] {
-                viewModel.storeVideoInfoList(items)
+                if viewModel.prefetchState != .idle {
+                    os_log("[DouyinPlayer] [%{public}s] 영상 %d개 수신 → 큐에 추가", source, items.count)
+                    viewModel.storeVideoInfoList(items)
+                } else {
+                    os_log("[DouyinPlayer] [%{public}s] 영상 %d개 수신 → 프리페치 미활성, 무시", source, items.count)
+                }
             }
         case "prefetchStatus":
+            os_log("[DouyinPlayer] [%{public}s] 프리페치 상태: %{public}s", source, value)
             if !value.hasPrefix("fetched_") {
                 viewModel.handlePrefetchFailure()
             }
         case "urlChanged":
+            os_log("[DouyinPlayer] URL 변경: %{public}s", value.prefix(100).description)
             viewModel.clearVideoURL()
         default:
             break
@@ -83,7 +91,7 @@ extension WebViewCoordinator: WKNavigationDelegate {
         if let mimeType = navigationResponse.response.mimeType,
            (mimeType.hasPrefix("video/") || mimeType.contains("mpegURL")),
            let url = navigationResponse.response.url?.absoluteString {
-            os_log("[DouyinPlayer] Video MIME detected: %{public}s", mimeType)
+            os_log("[DouyinPlayer] [Layer5:mime] 영상 MIME 감지: %{public}s — %{public}s", mimeType, url.prefix(100).description)
             viewModel.storeVideoURL(url)
         }
         decisionHandler(.allow)
